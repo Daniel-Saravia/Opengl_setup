@@ -11,7 +11,9 @@
 		"commands" : 
 		[
 			"add_executable",
-			"target_link_libraries"
+			"target_link_libraries",
+			"target_include_directories",
+			"set_property"
 		],
 		"files" : 
 		[
@@ -25,13 +27,25 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 7,
+				"line" : 10,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 13,
+				"line" : 26,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 20,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 33,
 				"parent" : 0
 			}
 		]
@@ -45,7 +59,26 @@
 					"fragment" : "-g"
 				}
 			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
+					"path" : "/home/parallels/Documents/my_project/src"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/usr/lib"
+				}
+			],
 			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					4
+				],
+				"standard" : "17"
+			},
 			"sourceIndexes" : 
 			[
 				0
@@ -58,10 +91,21 @@
 					"fragment" : "-g"
 				}
 			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
+					"path" : "/home/parallels/Documents/my_project/src"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/usr/lib"
+				}
+			],
 			"language" : "C",
 			"sourceIndexes" : 
 			[
-				2
+				1
 			]
 		}
 	],
@@ -112,14 +156,14 @@
 			"sourceIndexes" : 
 			[
 				0,
-				2
+				1
 			]
 		},
 		{
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
-				1
+				2
 			]
 		}
 	],
@@ -133,14 +177,14 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/glad.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
 			"compileGroupIndex" : 1,
 			"path" : "src/glad.c",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "src/glad.h",
+			"sourceGroupIndex" : 1
 		}
 	],
 	"type" : "EXECUTABLE"

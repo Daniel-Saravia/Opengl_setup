@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/c++
 C_DEFINES = 
 
-C_INCLUDES = 
+C_INCLUDES = -I/home/parallels/Documents/my_project/src -I/usr/lib
 
 C_FLAGS = -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/home/parallels/Documents/my_project/src -I/usr/lib
 
 CXX_FLAGS = -g
 

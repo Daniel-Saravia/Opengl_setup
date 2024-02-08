@@ -1346,6 +1346,22 @@
 			"value" : "OpenGl_DIR-NOTFOUND"
 		},
 		{
+			"name" : "glm_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for glm."
+				}
+			],
+			"type" : "PATH",
+			"value" : "/usr/lib/cmake/glm"
+		},
+		{
 			"name" : "my_opengl_project_BINARY_DIR",
 			"properties" : 
 			[

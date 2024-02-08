@@ -1,7 +1,8 @@
-//#include "vertex_shader.glsl"
-//#include "fragment_shader.glsl"
 #include "glad.h"
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,8 +14,17 @@ std::string readFile(const char* filePath);
 unsigned int compileShader(unsigned int type, const std::string& source);
 unsigned int createShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
 
+// Camera settings
+glm::vec3 cameraPositions[] = {
+    glm::vec3(0.0f, 0.0f, 10.0f), // Front view
+    glm::vec3(0.0f, 10.0f, 0.0f), // Top view
+    glm::vec3(10.0f, 0.0f, 0.0f)  // Side view
+};
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+int currentCameraPosition = 0; // Index of the current camera position
+
 int main() {
-    // Initialize GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -24,9 +34,8 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    // Create a window
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Pyramid", nullptr, nullptr);
-    if (!window) {
+    if (window == nullptr) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -34,21 +43,19 @@ int main() {
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
-    // Load and compile shaders
+    // Load shaders from files
     std::string vertexShaderSource = readFile("vertex_shader.glsl");
     std::string fragmentShaderSource = readFile("fragment_shader.glsl");
+
     unsigned int shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
-    // Define vertices for your pyramid here
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    float pyramidVertices[] = {
-        // Positions          // Colors
+    float vertices[] = {
+        // Positions         // Colors
          0.0f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, // Top
         -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f, // Front-left
          0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f, // Front-right
@@ -56,55 +63,63 @@ int main() {
         -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f  // Back-left
     };
     unsigned int indices[] = {
-        0, 1, 2,   // Front face
-        0, 2, 3,   // Right face
-        0, 3, 4,   // Back face
-        0, 4, 1,   // Left face
-        1, 2, 3,   // Base right triangle
-        1, 3, 4    // Base left triangle
+        0, 1, 2, // Front face
+        0, 2, 3, // Right face
+        0, 3, 4, // Back face
+        0, 4, 1, // Left face
+        1, 2, 3, // Base right triangle
+        1, 3, 4  // Base left triangle
     };
+
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidVertices), pyramidVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // render loop
     while (!glfwWindowShouldClose(window)) {
-        // input
         processInput(window);
 
-        // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // draw our pyramid
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        glm::mat4 view = glm::lookAt(cameraPositions[currentCameraPosition], cameraPositions[currentCameraPosition] + cameraFront, cameraUp);
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        for (int i = 0; i < 3; ++i) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(i * 2.0f - 2.0f, 0.0f, 0.0f)); // Move pyramids along x-axis
+            unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose:
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
-    // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
     return 0;
 }
@@ -116,21 +131,25 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) currentCameraPosition = 0; // Front view
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) currentCameraPosition = 1; // Top view
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) currentCameraPosition = 2; // Side view
 }
 
 std::string readFile(const char* filePath) {
-    std::ifstream file(filePath, std::ios::in);
+    std::ifstream fileStream(filePath, std::ios::in);
     std::string content;
 
-    if (!file.is_open()) {
-        std::cerr << "Could not open file " << filePath << std::endl;
+    if (!fileStream.is_open()) {
+        std::cerr << "Could not read file " << filePath << ". File does not exist." << std::endl;
         return "";
     }
 
     std::stringstream sstr;
-    sstr << file.rdbuf();
+    sstr << fileStream.rdbuf();
     content = sstr.str();
-    file.close();
+    fileStream.close();
 
     return content;
 }
@@ -143,13 +162,12 @@ unsigned int compileShader(unsigned int type, const std::string& source) {
 
     int result;
     glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) {
+    if (!result) {
         int length;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
         char* message = (char*)alloca(length * sizeof(char));
         glGetShaderInfoLog(id, length, &length, message);
-        std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-        std::cerr << message << std::endl;
+        std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!\n" << message << std::endl;
         glDeleteShader(id);
         return 0;
     }
@@ -172,3 +190,4 @@ unsigned int createShaderProgram(const std::string& vertexShader, const std::str
 
     return program;
 }
+

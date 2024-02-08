@@ -9,7 +9,7 @@
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "3.0.0"
+						"string" : "3.2"
 					},
 					"projectIndex" : 0,
 					"source" : ".",
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "my_opengl_project::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-my_opengl_project-Debug-633524c61ae69a41aace.json",
+					"jsonFile" : "target-my_opengl_project-Debug-ba2690438fb7addf882f.json",
 					"name" : "my_opengl_project",
 					"projectIndex" : 0
 				}

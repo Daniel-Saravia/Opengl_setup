@@ -253,6 +253,9 @@ OPENGL_xmesa_INCLUDE_DIR:PATH=OPENGL_xmesa_INCLUDE_DIR-NOTFOUND
 //The directory containing a CMake configuration file for OpenGl.
 OpenGl_DIR:PATH=OpenGl_DIR-NOTFOUND
 
+//The directory containing a CMake configuration file for glm.
+glm_DIR:PATH=/usr/lib/cmake/glm
+
 //Value Computed by CMake
 my_opengl_project_BINARY_DIR:STATIC=/home/parallels/Documents/my_project/build
 
@@ -428,4 +431,6 @@ OPENGL_glx_LIBRARY-ADVANCED:INTERNAL=1
 OPENGL_opengl_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OPENGL_xmesa_INCLUDE_DIR
 OPENGL_xmesa_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: glm_DIR
+glm_DIR-ADVANCED:INTERNAL=1
 
